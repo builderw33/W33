@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ledgerly — Receipts. Reconciled.</title>
+  <meta name="description" content="Ledgerly automates small business bookkeeping by matching receipts to bank transactions and exporting clean records to QuickBooks, Xero, and other accounting platforms." />
+  <meta property="og:title" content="Ledgerly — Receipts. Reconciled." />
+  <meta property="og:description" content="Automated bookkeeping for small businesses. Receipts are matched to bank transactions retrieved through Plaid, then exported to accounting software." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1a1a1a;
+      --paper: #faf8f3;
+      --paper-warm: #f3eee3;
+      --rule: #d9d3c4;
+      --accent: #c2410c;
+      --accent-soft: #fed7aa;
+      --muted: #6b6457;
+      --display: 'Fraunces', Georgia, serif;
+      --body: 'Inter Tight', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--body);
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Grain overlay for paper texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.4;
+      z-index: 1;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 32px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ============ NAV ============ */
+    nav {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .brand {
+      font-family: var(--display);
+      font-weight: 600;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+      font-variation-settings: 'opsz' 144;
+    }
+    .brand span { color: var(--accent); }
+    .nav-meta {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ============ HERO ============ */
+    .hero {
+      padding: 120px 0 100px;
+      position: relative;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 60px;
+    }
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .eyebrow::before {
+      content: '';
+      width: 32px;
+      height: 1px;
+      background: var(--accent);
+    }
+    h1 {
+      font-family: var(--display);
+      font-weight: 500;
+      font-size: clamp(48px, 8vw, 104px);
+      line-height: 0.98;
+      letter-spacing: -0.035em;
+      margin-bottom: 36px;
+      font-variation-settings: 'opsz' 144;
+      max-width: 14ch;
+    }
+    h1 em {
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent);
+    }
+    .lede {
+      font-size: 21px;
+      line-height: 1.5;
+      color: var(--ink);
+      max-width: 56ch;
+      margin-bottom: 48px;
+      font-weight: 400;
+    }
+    .hero-meta {
+      display: flex;
+      gap: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--rule);
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+    .hero-meta strong {
+      display: block;
+      color: var(--ink);
+      font-weight: 500;
+      margin-top: 6px;
+      font-family: var(--body);
+      font-size: 15px;
+    }
+
+    /* ============ SECTION ============ */
+    section {
+      padding: 100px 0;
+      border-top: 1px solid var(--rule);
+    }
+    .section-label {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+    .section-heading {
+      font-family: var(--display);
+      font-weight: 500;
+      font-size: clamp(36px, 5vw, 56px);
+      line-height: 1.05;
+      letter-spacing: -0.025em;
+      margin-bottom: 48px;
+      max-width: 22ch;
+    }
+
+    /* ============ HOW IT WORKS ============ */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 48px 56px;
+      margin-top: 40px;
+    }
+    .step-num {
+      font-family: var(--display);
+      font-size: 56px;
+      font-weight: 400;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 16px;
+      font-variation-settings: 'opsz' 144;
+      font-style: italic;
+    }
+    .step h3 {
+      font-family: var(--display);
+      font-weight: 500;
+      font-size: 22px;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      margin-bottom: 12px;
+    }
+    .step p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ============ DATA HANDLING ============ */
+    .data-section {
+      background: var(--paper-warm);
+      padding: 100px 0;
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+    .data-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .data-list {
+      list-style: none;
+    }
+    .data-list li {
+      padding: 22px 0;
+      border-bottom: 1px solid var(--rule);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 28px;
+      align-items: baseline;
+    }
+    .data-list li:last-child { border-bottom: none; }
+    .data-list .key {
+      font-family: var(--mono);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .data-list .val {
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    /* ============ ABOUT ============ */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .about-grid p {
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--ink);
+      margin-bottom: 20px;
+    }
+    .about-grid p:last-child { margin-bottom: 0; }
+
+    /* ============ CONTACT ============ */
+    .contact {
+      padding: 120px 0;
+      border-top: 1px solid var(--rule);
+      text-align: left;
+    }
+    .contact h2 {
+      font-family: var(--display);
+      font-weight: 500;
+      font-size: clamp(40px, 6vw, 72px);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin-bottom: 36px;
+      max-width: 16ch;
+    }
+    .contact h2 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+    .contact-email {
+      font-family: var(--display);
+      font-size: 28px;
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 4px;
+      transition: color 0.2s ease;
+      font-style: italic;
+      font-weight: 400;
+    }
+    .contact-email:hover { color: var(--accent); }
+    .contact-note {
+      margin-top: 32px;
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 50ch;
+    }
+
+    /* ============ FOOTER ============ */
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--rule);
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+    }
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+      border-bottom: 1px solid var(--rule);
+      transition: color 0.2s ease;
+    }
+    footer a:hover { color: var(--accent); }
+
+    /* ============ ANIMATIONS ============ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero > .container > * { animation: fadeUp 0.8s ease-out backwards; }
+    .hero .eyebrow { animation-delay: 0.1s; }
+    .hero h1 { animation-delay: 0.2s; }
+    .hero .lede { animation-delay: 0.35s; }
+    .hero .hero-meta { animation-delay: 0.5s; }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 760px) {
+      .container { padding: 0 24px; }
+      .hero { padding: 70px 0 60px; }
+      section { padding: 70px 0; }
+      .data-section { padding: 70px 0; }
+      .data-grid, .about-grid { grid-template-columns: 1fr; gap: 40px; }
+      .data-list li { grid-template-columns: 1fr; gap: 6px; }
+      .contact-email { font-size: 22px; }
+      .hero-meta { gap: 24px; }
+      footer .container { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="container">
+      <div class="brand">Ledger<span>ly</span></div>
+      <div class="nav-meta">Working title · Est. 2026</div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container">
+      <div class="eyebrow">Bookkeeping, finished</div>
+      <h1>Receipts <em>in.</em><br/>Clean books <em>out.</em></h1>
+      <p class="lede">
+        Ledgerly is automated bookkeeping for small businesses that still reconcile receipts by hand. Snap a photo, forward an email, or text us a receipt — we match it to the right bank transaction and export the result to your accounting software.
+      </p>
+      <div class="hero-meta">
+        <div>
+          Built for
+          <strong>Small business owners &amp; sole proprietors</strong>
+        </div>
+        <div>
+          Exports to
+          <strong>QuickBooks · Xero · Wave · CSV</strong>
+        </div>
+        <div>
+          Status
+          <strong>Closed beta · 2026</strong>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="how">
+    <div class="container">
+      <div class="section-label">How it works</div>
+      <h2 class="section-heading">Four steps from shoebox to spreadsheet.</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>Capture</h3>
+          <p>Send receipts via phone photo, forwarded email, or SMS. No app to install for capture — use the channels you already use.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>Extract</h3>
+          <p>AI reads each receipt and pulls vendor, date, total, tax, and itemized line details. Edge cases get queued for quick review.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>Match</h3>
+          <p>Bank and credit card transactions, pulled securely through Plaid, are matched to the right receipt automatically.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <h3>Export</h3>
+          <p>Clean, categorized records export to QuickBooks, Xero, or a generic CSV. Month-end becomes a five-minute task.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="data-section" id="data">
+    <div class="container">
+      <div class="data-grid">
+        <div>
+          <div class="section-label">Data handling</div>
+          <h2 class="section-heading" style="margin-bottom: 24px;">Boring, on purpose.</h2>
+          <p style="color: var(--muted); font-size: 15px; line-height: 1.6;">
+            We pull only the financial data needed to do the job, store it carefully, and never sell or share it. The user's accounting workflow is the only thing it's used for. Full detail lives in our <a href="privacy.html" style="color: var(--accent);">Privacy Policy</a>.
+          </p>
+        </div>
+        <ul class="data-list">
+          <li>
+            <span class="key">Plaid Products</span>
+            <span class="val">Transactions and Balance. No identity, auth, investments, or liabilities data.</span>
+          </li>
+          <li>
+            <span class="key">Purpose</span>
+            <span class="val">Matching user-submitted receipts to bank transactions and generating accounting exports.</span>
+          </li>
+          <li>
+            <span class="key">Storage</span>
+            <span class="val">Encrypted at rest, scoped per authenticated user, deleted on account closure.</span>
+          </li>
+          <li>
+            <span class="key">Sharing</span>
+            <span class="val">No third-party sale or sharing. Exports go only to destinations the user authorizes.</span>
+          </li>
+          <li>
+            <span class="key">Access</span>
+            <span class="val">Single-tenant access controls. Plaid tokens stored in encrypted secret storage.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="container">
+      <div class="section-label">About</div>
+      <h2 class="section-heading">Built by operators, for operators.</h2>
+      <div class="about-grid">
+        <div>
+          <p>Ledgerly began as an internal tool — a way to stop losing receipts, stop manually reconciling them against bank statements, and stop spending hours every month on bookkeeping that should be automatic.</p>
+          <p>It is built and maintained by a small team of small-business operators who wanted the product for their own books before offering it to anyone else.</p>
+        </div>
+        <div>
+          <p>The current closed beta runs against real operating businesses — real receipt formats, real bank feeds, real month-end deadlines — to harden the product before any wider release.</p>
+          <p>Expansion to other small business owners and sole proprietors will follow once the closed beta proves reliable at the messiness of real operations.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <div class="container">
+      <h2>Get in <em>touch.</em></h2>
+      <a class="contact-email" href="mailto:contact@example.com">contact@example.com</a>
+      <p class="contact-note">For beta access requests, partnership inquiries, or questions about how we handle financial data, send a note. Replies usually arrive within a business day.</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div>© 2026 Ledgerly · Working title</div>
+      <div class="footer-links">
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+      </div>
+      <div>In active development. Product details subject to change.</div>
+    </div>
+  </footer>
+
+</body>
+</html>

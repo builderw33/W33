@@ -62,6 +62,4 @@ python3 -m http.server 8000
 
 ## Contact
 
-General and privacy inquiries: `contact@example.com`
-
-> **Note:** `contact@example.com` is a placeholder. Replace it across `index.html`, `privacy.html`, and `terms.html` with a monitored address before submitting to Plaid or launching publicly.
+General and privacy inquiries: `hello@w33.biz`

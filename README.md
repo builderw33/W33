@@ -1,6 +1,6 @@
-# Ledgerly
+# W33
 
-> **"Ledgerly" is a working title.** The product name is not final and may change.
+> **"W33" is a working title.** The product name is not final and may change.
 
 Automated bookkeeping for small businesses. Receipts captured by phone photo, email, and SMS are matched to bank and credit card transactions retrieved through [Plaid](https://plaid.com), then exported to accounting platforms such as QuickBooks, Xero, and Wave.
 
